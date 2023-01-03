@@ -23,7 +23,10 @@ class AuthApi {
 		return response.data;
 	}
 	async addQuestion(params) {
-		const response = await authAxios.post(`${baseUrl}/question/add`, params);
+		const response = await authAxios.post(
+			`${baseUrl}/api/question/add`,
+			params
+		);
 		return response.data;
 	}
 }

@@ -25,7 +25,7 @@ instance.interceptors.response.use(
 		return response;
 	},
 	(error) => {
-		if (error.response.status === 401) {
+		if (error.response.status === 500) {
 			store.dispatch(logout());
 		}
 		if (error.response && error.response.data) {

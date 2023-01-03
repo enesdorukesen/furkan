@@ -2,7 +2,7 @@ import random
 
 from rest_framework import serializers
 
-from .models import User, Question
+from .models import User, Question,Choices
 
 class UserSerializer(serializers.ModelSerializer):
 
@@ -22,12 +22,21 @@ class UserSerializer(serializers.ModelSerializer):
         instance.save()
         return instance
 
+
+
+class ChoiceSerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model = Choices
+        fields = ['a', 'b', 'c', 'd', 'e', 'answer','question']
+
 class QuestionSerializer(serializers.ModelSerializer):
+
+    choices = ChoiceSerializer(many=True,read_only=True)
 
     class Meta:
         model = Question
-        fields = ['name', 'qtype', 'concept', 'level', 'text', 'solution','choices']
+        fields = ['given_id', 'qtype', 'concept', 'level', 'text', 'solution','quiz_or_sample', 'choices']
         extra_kwargs = {
-            'name': {'read_only': True}
+            'given_id': {'read_only': True}
         }
-

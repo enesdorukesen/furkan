@@ -10,13 +10,13 @@ import LockOutlinedIcon from '@mui/icons-material/LockOutlined';
 import Typography from '@mui/material/Typography';
 import Container from '@mui/material/Container';
 import { createTheme, ThemeProvider } from '@mui/material/styles';
-import Snackbar from '@mui/material/Snackbar';
-import MuiAlert from '@mui/material/Alert';
 
-import React, { useState } from 'react';
+import React from 'react';
 import { Link, useNavigate } from 'react-router-dom';
+import { useDispatch } from 'react-redux';
 
 import AuthApi from '../libs/request';
+import { startToaster } from '../store/slices/toasterSlice';
 
 function Copyright(props) {
 	return (
@@ -38,22 +38,10 @@ function Copyright(props) {
 
 const theme = createTheme();
 
-const Alert = React.forwardRef(function Alert(props, ref) {
-	return <MuiAlert elevation={6} ref={ref} variant="filled" {...props} />;
-});
-
 const RegisterPage = () => {
 	const navigate = useNavigate();
-	const [openToast, setOpenToast] = useState(false);
-	const [severity, setSeverity] = useState('');
-	const [toastMessage, setToastMessage] = useState('');
-
-	const ToastClose = (event, reason) => {
-		if (reason === 'clickaway') {
-			return;
-		}
-		setOpenToast(false);
-	};
+	const dispatch = useDispatch();
+	let toasterData;
 
 	const registerHandler = async (email, password) => {
 		const info = {
@@ -69,15 +57,20 @@ const RegisterPage = () => {
 			.catch((e) => (res = e));
 		console.log(res);
 		if (res['message'] === 'success') {
-			setSeverity('success');
-			setToastMessage(`Success! Please check ${res.email}`);
-			setOpenToast(true);
+			toasterData = {
+				openToast: true,
+				severity: 'success',
+				message: `Success! Please check email ${res.email}`,
+			};
+			dispatch(startToaster(toasterData));
 			navigate('/login');
 		} else {
-			setSeverity('error');
-			setToastMessage(`Error! Email alredy in use`);
-			console.log(toastMessage);
-			setOpenToast(true);
+			toasterData = {
+				openToast: true,
+				severity: 'error',
+				message: `Registration failed. Email already in use!`,
+			};
+			dispatch(startToaster(toasterData));
 		}
 	};
 
@@ -93,12 +86,6 @@ const RegisterPage = () => {
 
 	return (
 		<ThemeProvider theme={theme}>
-			<Snackbar open={openToast} autoHideDuration={6000} onClose={ToastClose}>
-				<Alert onClose={ToastClose} severity={severity} sx={{ width: '100%' }}>
-					{toastMessage}
-				</Alert>
-			</Snackbar>
-
 			<Container component="main" maxWidth="xs">
 				<CssBaseline />
 				<Box

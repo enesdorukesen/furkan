@@ -4,11 +4,13 @@ import Typography from '@mui/material/Typography';
 import Box from '@mui/material/Box';
 
 import React, { useState } from 'react';
+import { useDispatch, useSelector } from 'react-redux';
 
 import AuthApi from '../libs/request';
-import { useDispatch, useSelector } from 'react-redux';
 import { setUser } from '../store/auth/authSlice';
 import LinearRegression from '../components/LinearRegression';
+import { startToaster } from '../store/slices/toasterSlice';
+import PythonPlayground from '../components/PythonPlayground';
 
 function TabPanel(props) {
 	const { children, value, index, ...other } = props;
@@ -32,20 +34,28 @@ function TabPanel(props) {
 
 const HomePage = () => {
 	const [innerValue, setInnerValue] = useState(0);
-
 	const dispatch = useDispatch();
 	let user = useSelector((state) => state.auth);
+	let toasterData;
 
 	const innerHandleChange = (event, newValue) => {
 		setInnerValue(newValue);
 	};
 
-	if (user.accessToken !== '') {
+	if (user.accessToken !== '' && user.userName === 'Guest') {
 		const fetchData = async () => {
 			let res;
 			await AuthApi.getUser()
 				.then((response) => (res = response))
 				.catch((e) => (res = e));
+			if (res['username']) {
+				toasterData = {
+					openToast: true,
+					severity: 'success',
+					message: `Welcome ${res.username}`,
+				};
+			}
+			dispatch(startToaster(toasterData));
 			dispatch(setUser(res));
 		};
 		fetchData();
@@ -74,6 +84,7 @@ const HomePage = () => {
 			</Box>
 			<TabPanel value={innerValue} index={0}>
 				<LinearRegression />
+				<PythonPlayground />
 			</TabPanel>
 			<TabPanel value={innerValue} index={1}>
 				Topic 1 content

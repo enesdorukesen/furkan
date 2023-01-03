@@ -21,6 +21,7 @@ import { useNavigate } from 'react-router-dom';
 import { useDispatch, useSelector } from 'react-redux';
 
 import { logout, login } from '../store/auth/authSlice';
+import { startToaster } from '../store/slices/toasterSlice';
 
 const drawerWidth = 240;
 
@@ -66,6 +67,12 @@ const Header = () => {
 
 	const logoutHandler = () => {
 		dispacth(logout());
+		const toasterData = {
+			openToast: true,
+			severity: 'success',
+			message: `Logout successful`,
+		};
+		dispacth(startToaster(toasterData));
 		navigate('/');
 	};
 	if (localStorage.getItem('accessToken')) {

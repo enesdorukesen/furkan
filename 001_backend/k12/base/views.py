@@ -1,15 +1,13 @@
 import jwt, datetime
-
 from django.shortcuts import render
+from django.http import JsonResponse
 
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework.exceptions import AuthenticationFailed
-from rest_framework.authentication import SessionAuthentication, BasicAuthentication
-from rest_framework.permissions import IsAuthenticated
 
-from .serializers import UserSerializer, QuestionSerializer
-from .models import User, Question, Question
+from .serializers import UserSerializer, QuestionSerializer, ChoiceSerializer
+from .models import User, Question, Choices
 
 class RegisterView(APIView):
     def post(self, request):
@@ -103,11 +101,12 @@ class LogoutView(APIView):
         }
         return response
 
+
 class QuestionView(APIView):
     def get(self, request):
         questions = Question.objects.all()
-        serializer = QuestionSerializer(questions, many=True)
-        return Response(serializer.data)
+        response = QuestionSerializer(questions, many=True)
+        return Response(response.data)
 
 
 
@@ -130,9 +129,12 @@ class AddQuestionView(APIView):
         if (user.status != "TA" and 'IN' and 'AD'):
             raise AuthenticationFailed('Unauthorized User')
 
-        
-        serializer = QuestionSerializer(data=request.data)
-        serializer.is_valid(raise_exception=True)
-        serializer.save()
-        response = serializer.data
-        return Response(response)
+        data = request.data
+        question = QuestionSerializer(data=data)
+        question.is_valid(raise_exception=True)
+        question.save()
+        data['choices']["question"] = question.data["given_id"]
+        choices = ChoiceSerializer(data = data['choices'])
+        choices.is_valid(raise_exception=True)
+        choices.save()
+        return Response (question.data)

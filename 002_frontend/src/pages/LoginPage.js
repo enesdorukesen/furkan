@@ -10,15 +10,14 @@ import LockOutlinedIcon from '@mui/icons-material/LockOutlined';
 import Typography from '@mui/material/Typography';
 import Container from '@mui/material/Container';
 import { createTheme, ThemeProvider } from '@mui/material/styles';
-import Snackbar from '@mui/material/Snackbar';
-import MuiAlert from '@mui/material/Alert';
 
-import React, { useEffect, useState } from 'react';
+import React from 'react';
 import { useDispatch } from 'react-redux';
 import { Link, useNavigate } from 'react-router-dom';
 
 import { login } from '../store/auth/authSlice';
 import AuthApi from '../libs/request';
+import { startToaster } from '../store/slices/toasterSlice';
 
 function Copyright(props) {
 	return (
@@ -40,30 +39,10 @@ function Copyright(props) {
 
 const theme = createTheme();
 
-const Alert = React.forwardRef(function Alert(props, ref) {
-	return <MuiAlert elevation={6} ref={ref} variant="filled" {...props} />;
-});
-
 const LoginPage = () => {
 	const dispatch = useDispatch();
 	const navigate = useNavigate();
-
-	const [openToast, setOpenToast] = useState(false);
-	const [severity, setSeverity] = useState('');
-	const [toastMessage, setToastMessage] = useState('');
-
-	const ToastClose = (event, reason) => {
-		if (reason === 'clickaway') {
-			return;
-		}
-		setOpenToast(false);
-	};
-
-	useEffect(() => {
-		if (localStorage.getItem('accessToken')) {
-			navigate('/');
-		}
-	}, [navigate]);
+	let toasterData;
 
 	const loginHandler = async (username, password) => {
 		const info = {
@@ -77,12 +56,22 @@ const LoginPage = () => {
 			})
 			.catch((e) => (res = e));
 		if (res['accessToken']) {
+			toasterData = {
+				openToast: true,
+				severity: 'success',
+				message: `Login success`,
+			};
 			dispatch(login(res));
+			dispatch(startToaster(toasterData));
 			navigate('/');
 		} else {
-			setSeverity('error');
-			setToastMessage(`Error! ${res['detail']}`);
-			setOpenToast(true);
+			toasterData = {
+				openToast: true,
+				severity: 'error',
+				message: `Error! ${res['detail']}`,
+			};
+			console.log('first');
+			dispatch(startToaster(toasterData));
 		}
 	};
 
@@ -94,11 +83,6 @@ const LoginPage = () => {
 
 	return (
 		<ThemeProvider theme={theme}>
-			<Snackbar open={openToast} autoHideDuration={6000} onClose={ToastClose}>
-				<Alert onClose={ToastClose} severity={severity} sx={{ width: '100%' }}>
-					{toastMessage}
-				</Alert>
-			</Snackbar>
 			<Container component="main" maxWidth="xs">
 				<CssBaseline />
 				<Box

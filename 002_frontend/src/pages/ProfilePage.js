@@ -1,40 +1,28 @@
 import Button from '@mui/material/Button';
 import CssBaseline from '@mui/material/CssBaseline';
 import TextField from '@mui/material/TextField';
-
 import Grid from '@mui/material/Grid';
 import Box from '@mui/material/Box';
 import Typography from '@mui/material/Typography';
 import Container from '@mui/material/Container';
 import { createTheme, ThemeProvider } from '@mui/material/styles';
-import Snackbar from '@mui/material/Snackbar';
-import MuiAlert from '@mui/material/Alert';
 
-import React, { useState } from 'react';
+import React from 'react';
+
+import { useDispatch, useSelector } from 'react-redux';
+import { useNavigate } from 'react-router-dom';
 
 import AuthApi from '../libs/request';
-import { useDispatch, useSelector } from 'react-redux';
 import { setUser } from '../store/auth/authSlice';
+import { startToaster } from '../store/slices/toasterSlice';
 
 const theme = createTheme();
 
-const Alert = React.forwardRef(function Alert(props, ref) {
-	return <MuiAlert elevation={6} ref={ref} variant="filled" {...props} />;
-});
-
 const ProfilePage = () => {
 	const dispatch = useDispatch();
+	const navigate = useNavigate();
 	const user = useSelector((state) => state.auth);
-	const [openToast, setOpenToast] = useState(false);
-	const [severity, setSeverity] = useState('');
-	const [toastMessage, setToastMessage] = useState('');
-
-	const ToastClose = (event, reason) => {
-		if (reason === 'clickaway') {
-			return;
-		}
-		setOpenToast(false);
-	};
+	let toasterData;
 
 	const updateHandler = async (first_name, last_name, mobile) => {
 		let res;
@@ -44,9 +32,14 @@ const ProfilePage = () => {
 			})
 			.catch((e) => (res = e));
 		if (res['message'] === 'Success') {
-			setSeverity('success');
-			setToastMessage(`Success! User profile updated!`);
-			setOpenToast(true);
+			toasterData = {
+				openToast: true,
+				severity: 'success',
+				message: `Success! User profile updated!`,
+			};
+			dispatch(startToaster(toasterData));
+			navigate('/');
+
 			const fetchData = async () => {
 				let res;
 				await AuthApi.getUser()
@@ -56,10 +49,12 @@ const ProfilePage = () => {
 			};
 			fetchData();
 		} else {
-			setSeverity('error');
-			setToastMessage(`Error! Update failed!`);
-			console.log(toastMessage);
-			setOpenToast(true);
+			toasterData = {
+				openToast: true,
+				severity: 'error',
+				message: `Error! Update failed!`,
+			};
+			dispatch(startToaster(toasterData));
 		}
 	};
 
@@ -75,11 +70,6 @@ const ProfilePage = () => {
 
 	return (
 		<ThemeProvider theme={theme}>
-			<Snackbar open={openToast} autoHideDuration={1000} onClose={ToastClose}>
-				<Alert onClose={ToastClose} severity={severity} sx={{ width: '100%' }}>
-					{toastMessage}
-				</Alert>
-			</Snackbar>
 			<Container component="main" maxWidth="xs">
 				<CssBaseline />
 				<Box
