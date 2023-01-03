@@ -36,11 +36,11 @@ class Question(models.Model):
 
 class Choices(models.Model):
     question = models.ForeignKey(Question, on_delete=models.CASCADE, null=True, related_name="choices")
-    a = models.TextField(max_length=500)
-    b = models.TextField(max_length=500)
-    c = models.TextField(max_length=500)
-    d = models.TextField(max_length=500)
-    e = models.TextField(max_length=500)
+    choice_a = models.TextField(max_length=500)
+    choice_b = models.TextField(max_length=500)
+    choice_c = models.TextField(max_length=500)
+    choice_d = models.TextField(max_length=500)
+    choice_e = models.TextField(max_length=500)
     answer = models.CharField(max_length=1)
 
     def __str__(self) :

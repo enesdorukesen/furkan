@@ -4,7 +4,7 @@ from django.http import JsonResponse
 
 from rest_framework.views import APIView
 from rest_framework.response import Response
-from rest_framework.exceptions import AuthenticationFailed
+from rest_framework.exceptions import AuthenticationFailed, PermissionDenied
 
 from .serializers import UserSerializer, QuestionSerializer, ChoiceSerializer
 from .models import User, Question, Choices
@@ -43,7 +43,7 @@ class LoginView(APIView):
         token = jwt.encode(payload, 'secretsecret', algorithm='HS256')
 
         response = Response()
-        response.set_cookie(key='accessToken', value=token, httponly=True)
+        # response.set_cookie(key='accessToken', value=token, httponly=True)
         response.data = {'accessToken':token}
 
         return response
@@ -126,8 +126,8 @@ class AddQuestionView(APIView):
 
         user = User.objects.filter(id=payload['id']).first()
 
-        if (user.status != "TA" and 'IN' and 'AD'):
-            raise AuthenticationFailed('Unauthorized User')
+        if (user.status != "TA" and user.status != 'IN' and user.status != 'AD'):
+            raise PermissionDenied ({'detail':'Unauthorized User'})
 
         data = request.data
         question = QuestionSerializer(data=data)
