@@ -27,11 +27,11 @@ const AddQuestion = () => {
 		level,
 		text,
 		solution,
-		a,
-		b,
-		c,
-		d,
-		e,
+		choice_a,
+		choice_b,
+		choice_c,
+		choice_d,
+		choice_e,
 		answer
 	) => {
 		const info = {
@@ -41,7 +41,7 @@ const AddQuestion = () => {
 			level: level,
 			text: text,
 			solution: solution,
-			choices: { a, b, c, d, e, answer },
+			choices: { choice_a, choice_b, choice_c, choice_d, choice_e, answer },
 		};
 		let res;
 		console.log(info);
@@ -50,18 +50,26 @@ const AddQuestion = () => {
 				res = response;
 			})
 			.catch((e) => (res = e));
-		if (res['name']) {
+		if (res['given_id']) {
 			toasterData = {
 				openToast: true,
 				severity: 'success',
 				message: `Question added successfully`,
 			};
 			dispatch(startToaster(toasterData));
-		} else {
+		} else if (res['detail']) {
 			toasterData = {
 				openToast: true,
 				severity: 'error',
 				message: `Error! ${res['detail']}`,
+			};
+			dispatch(startToaster(toasterData));
+		} else {
+			let temp = res[Object.keys(res)[0]];
+			toasterData = {
+				openToast: true,
+				severity: 'error',
+				message: `Error! ${temp} : "${Object.keys(res)[0]}"`,
 			};
 			dispatch(startToaster(toasterData));
 		}
@@ -79,8 +87,8 @@ const AddQuestion = () => {
 			data.get('solution'),
 			data.get('a'),
 			data.get('b'),
+			data.get('c'),
 			data.get('d'),
-			data.get('f'),
 			data.get('e'),
 			data.get('answer')
 		);
